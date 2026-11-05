@@ -1,0 +1,12 @@
+{
+  "name": "live-birr-device-verification",
+  "version": "1.0.0",
+  "description": "LIVE BIRR Device Verification Mini App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
