@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVE BIRR Verification</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            min-height: 100vh;
+            background: #071b14;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            background: #102a20;
+            padding: 30px 22px;
+            border-radius: 20px;
+            border: 1px solid #24543c;
+        }
+
+        .logo {
+            font-size: 55px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: #42d68b;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #c3d5cb;
+            line-height: 1.7;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: #20a66b;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">🔐</div>
+
+    <h2>LIVE BIRR</h2>
+
+    <p><b>ስልክዎን ያረጋግጡ</b></p>
+
+    <p>
+        የLIVE BIRR መለያዎን ለመጠበቅ
+        የመሳሪያዎን ማረጋገጫ ያጠናቅቁ።
+    </p>
+
+    <button id="verifyBtn" onclick="verifyDevice()">
+        📱 አሁን ያረጋግጡ
+    </button>
+
+    <div id="status">🔒 ማረጋገጫ ይጠብቃል</div>
+
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    function getDeviceId() {
+        let id = localStorage.getItem("live_birr_device");
+
+        if (!id) {
+            id = crypto.randomUUID();
+            localStorage.setItem("live_birr_device", id);
+        }
+
+        return id;
+    }
+
+    async function verifyDevice() {
+        const status = document.getElementById("status");
+        const button = document.getElementById("verifyBtn");
+
+        if (!tg.initData) {
+            status.textContent = "❌ Telegram irraa bani.";
+            return;
+        }
+
+        button.disabled = true;
+        status.textContent = "⏳ ማረጋገጫ በመካሄድ ላይ...";
+
+        try {
+            const response = await fetch("/api/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    initData: tg.initData,
+                    deviceId: getDeviceId()
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                status.textContent =
+                    "✅ መረጃዎ ተልኳል። የአስተዳዳሪ ግምገማ ይጠብቁ።";
+            } else {
+                status.textContent = "❌ ማረጋገጫ አልተሳካም።";
+                button.disabled = false;
+            }
+
+        } catch (error) {
+            status.textContent = "❌ የአገልጋይ ስህተት።";
+            button.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
